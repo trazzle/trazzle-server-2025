@@ -33,6 +33,8 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafle-call': 'off',
       '@typescript-eslint/unbound-method': 'off',
       '@typescript-eslint/no-unsafe-call': 'warn',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'warn',
     },
   },
 );

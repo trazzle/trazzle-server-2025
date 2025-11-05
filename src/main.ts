@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { SuccessResponseInterceptor } from './common/interceptors/success-response.interceptor';
 
 async function bootstrap() {
   const logger = new Logger('Server');
@@ -24,6 +25,7 @@ async function bootstrap() {
     }),
   );
   // Interceptor
+  app.useGlobalInterceptors(new SuccessResponseInterceptor());
 
   // Exception Filter
 
