@@ -6,6 +6,10 @@ const appConfig = registerAs('app', () => ({
   // 데이터베이스
   databaseurl: process.env.DATABASE_URL!,
   // 토큰 (jwt)
+  // Redis
+  redisUrl: process.env.REDIS_URL!,
+  redisHost: process.env.REDIS_HOST!,
+  redisPort: process.env.REDIS_PORT!,
 }));
 export type AppConfig = ConfigType<typeof appConfig>;
 
@@ -16,8 +20,11 @@ export const configModuleOptions = {
     SERVER_PORT: z.coerce.number(),
     // 데이터베이스
     DATABASE_URL: z.string().min(1),
+    // Redis
+    REDIS_URL: z.string().min(1),
+    REDIS_HOST: z.string().min(1),
+    REDIS_PORT: z.coerce.number(),
     // 토큰 (jwt)
-    // REDIS
   }).parse,
   load: [appConfig],
 } satisfies ConfigModuleOptions;
