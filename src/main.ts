@@ -4,6 +4,10 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { SuccessResponseInterceptor } from './common/interceptors/success-response.interceptor';
+import { PrismaClientExceptionFilter } from './prisma/prisma-client-exception.filter';
+import { IORedisExceptionFilter } from './redis-cache/ioredis-exception.filter';
+import { HttpExceptionsFilter } from './common/exception-filters/http-exception.filter';
+import { DiscordsService } from './discords/discords.service';
 
 async function bootstrap() {
   const logger = new Logger('Server');
@@ -14,6 +18,8 @@ async function bootstrap() {
   });
 
   const configService = app.get<ConfigService>(ConfigService);
+  const discordService = app.get<DiscordsService>(DiscordsService);
+
   const SERVER_PORT = configService.get<number>('SERVER_PORT') || 3000;
 
   // Global Validation Pipes
@@ -28,6 +34,11 @@ async function bootstrap() {
   app.useGlobalInterceptors(new SuccessResponseInterceptor());
 
   // Exception Filter
+  app.useGlobalFilters(
+    new PrismaClientExceptionFilter(),
+    new IORedisExceptionFilter(),
+    new HttpExceptionsFilter(discordService),
+  );
 
   // REST API URI prefix - URI 맨앞에 'api' 를 붙임
   app.setGlobalPrefix('api');

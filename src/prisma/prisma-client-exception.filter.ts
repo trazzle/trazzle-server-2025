@@ -1,18 +1,22 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus } from '@nestjs/common';
+import { ArgumentsHost, Catch, ExceptionFilter, HttpStatus, Logger } from '@nestjs/common';
 import {
   PrismaClientKnownRequestError,
   PrismaClientValidationError,
 } from '@prisma/client/runtime/library';
-import { Response } from 'express';
+import { Request, Response } from 'express';
+import { generateErrorResponse } from 'src/common/exception-filters/generate-error-response.function';
 
 @Catch(PrismaClientValidationError, PrismaClientKnownRequestError)
 export class PrismaClientExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(PrismaClientExceptionFilter.name);
   catch(
     exception: PrismaClientValidationError | PrismaClientKnownRequestError,
     host: ArgumentsHost,
   ) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
+    const request = ctx.getResponse<Request>();
+
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
     let message = 'Internal Server Error';
     let error = 'Internal Server Error';
@@ -62,12 +66,15 @@ export class PrismaClientExceptionFilter implements ExceptionFilter {
           error = exception.code;
       }
     }
-
-    response.status(status).json({
+    const responseBody = generateErrorResponse({
+      request,
       statusCode: status,
-      error,
       message,
-      timestamp: new Date().toISOString(),
+      errorType: 'PRISMA_ORM_EXCEPTION',
+      error,
     });
+
+    this.logger.error(`[${responseBody.errorType}]: ${responseBody.message}`, exception.stack);
+    response.status(status).json(responseBody);
   }
 }
