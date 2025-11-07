@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,138 +8,109 @@ datasource db {
 }
 
 model User {
-  id                Int       @id @default(autoincrement()) // PK
-  account           String    @unique                       // 계정
-  name              String                                  // 이름
-  intro             String?                                 // 자기소개
-  profile_image_url String?                                 // 프로필 이미지 S3 URL
-  role              Role      @default(USER)                // 역할
-  created_at        DateTime  @default(now())               // 생성일
-  updated_at        DateTime? @updatedAt                    // 수정일
+  id                Int       @id @default(autoincrement())
+  account           String    @unique
+  name              String
+  intro             String?
+  profile_image_url String?
+  role              Role      @default(USER)
+  created_at        DateTime  @default(now())
+  updated_at        DateTime? @updatedAt
+  travels           Travel[]
 
-  // User:Travel=1:N
-  travels           Travel[]                                // 여행기록 리스트
   @@map("user")
 }
 
-enum Role {
-  USER
-  ADMIN
-}
-
-// 여행
 model Travel {
-  id          Int       @id @default(autoincrement())  // PK
-  start_date  DateTime                                 // 여행 시작일
-  end_date    DateTime                                 // 여행 종료일
-  title       String                                   // 제목
-  content     String?   @db.VarChar(280)               // 내용
-  created_at  DateTime  @default(now())                // 생성일
-  updated_at  DateTime? @updatedAt                     // 수정일
-
-  // 여행 이미지 (Travel:TravelImage=1:N)
-  images TravelImage[]
-
-  // 작성자 (Travel:User=N:1)
-  author  User @relation(fields: [user_id], references: [id])
-  user_id Int
-
-  // 여행국가 (Travel:Country=N:1)
-  country     Country  @relation(fields: [country_code], references: [code])
-  country_code String  @db.VarChar(2) // 국가 코드
-
-  // 여행도시 (Travel:City=N:1)
-  city        City?     @relation(fields: [city_id], references: [id])
-  city_id     Int?
-  etc_city_name   String?   // 기타도시명
-
-  // 마그넷 (Travel:Magnet=N:1)
-  magnet Magnet  @relation(fields: [magnet_id], references: [id])
-  magnet_id Int
+  id            Int           @id @default(autoincrement())
+  start_date    DateTime
+  end_date      DateTime
+  title         String
+  content       String?       @db.VarChar(280)
+  created_at    DateTime      @default(now())
+  updated_at    DateTime?     @updatedAt
+  user_id       Int
+  country_code  String        @db.VarChar(2)
+  city_id       Int?
+  etc_city_name String?
+  magnet_id     Int
+  city          City?         @relation(fields: [city_id], references: [id])
+  country       Country       @relation(fields: [country_code], references: [code])
+  magnet        Magnet        @relation(fields: [magnet_id], references: [id])
+  author        User          @relation(fields: [user_id], references: [id])
+  images        TravelImage[]
 
   @@map("travel")
 }
 
-// 여행 이미지
 model TravelImage {
-  id           Int        @id @default(autoincrement()) // PK
-  sequence     Int                                      // 이미지 순서  
-  url          String                                   // 이미지 URL  
-  created_at   DateTime   @default(now())               // 생성일
-
-  // TravelImage:Travel=N:1
-  travel       Travel @relation(fields: [travel_id], references: [id], onDelete: Cascade)
-  travel_id    Int
+  id         Int      @id @default(autoincrement())
+  sequence   Int
+  url        String
+  created_at DateTime @default(now())
+  travel_id  Int
+  travel     Travel   @relation(fields: [travel_id], references: [id], onDelete: Cascade)
 
   @@map("travel_image")
 }
 
 model Country {
-  id        Int      @id @default(autoincrement()) // PK
-  code      String   @unique                       // 국가코드 (2글자)
-  name      String   @unique                       // 국가명
-  continent String                                 // 대륙
-  created_at DateTime @default(now())              // 생성일
-  updated_at DateTime @updatedAt                   // 수정일
-
-  // 도시 (Country:City=1:N)
-  cities   City[]
-
-  // Country:Travel=1:N
-  travels Travel[]
-
-  // Country:Magnet=1:N
-  magnets Magnet[]
+  id         Int      @id @default(autoincrement())
+  code       String   @unique
+  name       String   @unique
+  continent  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  cities     City[]
+  magnets    Magnet[]
+  travels    Travel[]
 
   @@map("country")
 }
 
 model City {
-  id          Int          @id @default(autoincrement()) // PK
-  name        String                                     // 도시명
-  name_kr     String?                                    // 도시명 한국어
-  latitude    String?                                    // 도시 위도 (기타도시는 없음)
-  longitude   String?                                    // 도시 경도 (기타도시는 없음)
-  createdAt   DateTime     @default(now())               // 생성일
-  updatedAt   DateTime     @updatedAt                    // 수정일
-  
-  // City:Country=N:1
-  country      Country  @relation(fields: [country_code], references: [code])
+  id           Int      @id @default(autoincrement())
+  name         String
+  name_kr      String?
+  latitude     String?
+  longitude    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
   country_code String
-                                                              // 참조키
-  // City:Travel=1:N
-  travels Travel[]
-
-  // City:Magnet=1:N
-  Magnet      Magnet[]
+  country      Country  @relation(fields: [country_code], references: [code])
+  Magnet       Magnet[]
+  travels      Travel[]
 
   @@map("city")
 }
 
 model Magnet {
-  id        Int      @id @default(autoincrement())  // PK
-  url       String   @unique                        // 마그넷 S3 URL
-  name      String                                  // 마그넷 이름
-  type      MagnetType                              // 마그넷 타입
-  created_at DateTime @default(now())               // 생성일
-  updated_at DateTime @updatedAt                    // 수정일
-
-  // Magnet:Country=N:1 (국기 마그넷)
-  country Country? @relation(fields:[country_code], references: [code], onDelete: Cascade)
-  country_code String? @db.VarChar(2)
-
-  // Magnet:City=N:1 (특정 도시 마그넷)
-  city      City? @relation(fields: [city_id], references: [id], onDelete: Cascade)  
-  city_id   Int?
-
-  // Magnet:Travel=1:N
-  travels Travel[]
+  id           Int        @id @default(autoincrement())
+  url          String     @unique
+  name         String
+  type         MagnetType
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+  country_code String?    @db.VarChar(2)
+  city_id      Int?
+  city         City?      @relation(fields: [city_id], references: [id], onDelete: Cascade)
+  country      Country?   @relation(fields: [country_code], references: [code], onDelete: Cascade)
+  travels      Travel[]
 
   @@map("magnet")
 }
 
+enum Role {
+  USER
+  ADMIN
+
+  @@map("user_role")
+}
+
 enum MagnetType {
-  SPECIAL_CITY  // 특정 도시마그넷
-  COUNTRY       // 국기 마그넷
-  LOGO          // Trazzle 로고 마그넷
+  SPECIAL_CITY
+  COUNTRY
+  LOGO
+
+  @@map("magnet_type")
 }
