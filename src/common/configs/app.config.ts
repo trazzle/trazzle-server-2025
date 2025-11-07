@@ -9,6 +9,12 @@ const appConfig = registerAs('app', () => ({
   redisUrl: process.env.REDIS_URL!,
   redisHost: process.env.REDIS_HOST!,
   redisPort: process.env.REDIS_PORT!,
+  // aws credentials
+  awsAccessKey: process.env.AWS_ACCESS_KEY_ID!,
+  awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  // aws (s3)
+  s3Region: process.env.AWS_REGION!,
+  s3BucketName: process.env.AWS_S3_BUCKET_NAME!,
   // discord webhook url
   discordWebhook: process.env.DISCORD_WEBHOOK_URL!,
   // 토큰 (jwt)
@@ -28,6 +34,12 @@ export const configModuleOptions = {
     REDIS_PORT: z.coerce.number(),
     // 디스코드 장애 웹훅 URL
     DISCORD_WEBHOOK_URL: z.string().min(1),
+    // aws credentials
+    AWS_ACCESS_KEY_ID: z.string().min(1),
+    AWS_SECRET_ACCESS_KEY: z.string().min(1),
+    // aws s3
+    AWS_REGION: z.string().min(1),
+    AWS_S3_BUCKET_NAME: z.string().min(1),
     // 토큰 (jwt)
   }).parse,
   load: [appConfig],
