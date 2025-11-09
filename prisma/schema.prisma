@@ -37,7 +37,7 @@ enum Role {
 model Travel {
   id          Int       @id @default(autoincrement())  // PK
   start_date  DateTime                                 // 여행 시작일
-  end_date    String                                   // 여행 종료일
+  end_date    DateTime                                 // 여행 종료일
   title       String                                   // 제목
   content     String?   @db.VarChar(280)               // 내용
   created_at  DateTime  @default(now())                // 생성일
@@ -53,14 +53,13 @@ model Travel {
   // 여행국가 (Travel:Country=N:1)
   country     Country  @relation(fields: [country_code], references: [code])
   country_code String  @db.VarChar(2) // 국가 코드
-  country_id Int 
 
   // 여행도시 (Travel:City=N:1)
   city        City?     @relation(fields: [city_id], references: [id])
   city_id     Int?
   etc_city_name   String?   // 기타도시명
 
-  // 마그넷 (Travel:Manget=N:1)
+  // 마그넷 (Travel:Magnet=N:1)
   magnet Magnet  @relation(fields: [magnet_id], references: [id])
   magnet_id Int
 
