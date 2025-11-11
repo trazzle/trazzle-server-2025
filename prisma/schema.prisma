@@ -58,6 +58,7 @@ model Country {
   id         Int      @id @default(autoincrement())
   code       String   @unique
   name       String   @unique
+  name_kr    String   
   continent  String
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
