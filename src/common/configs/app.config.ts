@@ -5,11 +5,13 @@ const appConfig = registerAs('app', () => ({
   serverPort: process.env.SERVER_PORT!,
   // 데이터베이스
   databaseurl: process.env.DATABASE_URL!,
-  // 토큰 (jwt)
   // Redis
   redisUrl: process.env.REDIS_URL!,
   redisHost: process.env.REDIS_HOST!,
   redisPort: process.env.REDIS_PORT!,
+  // discord webhook url
+  discordWebhook: process.env.DISCORD_WEBHOOK_URL!,
+  // 토큰 (jwt)
 }));
 export type AppConfig = ConfigType<typeof appConfig>;
 
@@ -24,6 +26,8 @@ export const configModuleOptions = {
     REDIS_URL: z.string().min(1),
     REDIS_HOST: z.string().min(1),
     REDIS_PORT: z.coerce.number(),
+    // 디스코드 장애 웹훅 URL
+    DISCORD_WEBHOOK_URL: z.string().min(1),
     // 토큰 (jwt)
   }).parse,
   load: [appConfig],
