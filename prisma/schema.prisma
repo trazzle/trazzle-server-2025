@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,4 +5,113 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id                Int       @id @default(autoincrement())
+  account           String    @unique
+  name              String
+  intro             String?
+  profile_image_url String?
+  role              Role      @default(USER)
+  created_at        DateTime  @default(now())
+  updated_at        DateTime? @updatedAt
+  travels           Travel[]
+
+  @@map("user")
+}
+
+model Travel {
+  id            Int           @id @default(autoincrement())
+  start_date    DateTime
+  end_date      DateTime
+  title         String
+  content       String?       @db.VarChar(280)
+  created_at    DateTime      @default(now())
+  updated_at    DateTime?     @updatedAt
+  user_id       Int
+  country_code  String        @db.VarChar(2)
+  city_id       Int?
+  etc_city_name String?
+  magnet_id     Int
+  city          City?         @relation(fields: [city_id], references: [id])
+  country       Country       @relation(fields: [country_code], references: [code])
+  magnet        Magnet        @relation(fields: [magnet_id], references: [id])
+  author        User          @relation(fields: [user_id], references: [id])
+  images        TravelImage[]
+
+  @@map("travel")
+}
+
+model TravelImage {
+  id         Int      @id @default(autoincrement())
+  sequence   Int
+  url        String
+  created_at DateTime @default(now())
+  travel_id  Int
+  travel     Travel   @relation(fields: [travel_id], references: [id], onDelete: Cascade)
+
+  @@map("travel_image")
+}
+
+model Country {
+  id         Int      @id @default(autoincrement())
+  code       String   @unique
+  name       String   @unique
+  name_kr    String   
+  continent  String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  cities     City[]
+  magnets    Magnet[]
+  travels    Travel[]
+
+  @@map("country")
+}
+
+model City {
+  id           Int      @id @default(autoincrement())
+  name         String
+  name_kr      String?
+  latitude     String?
+  longitude    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  country_code String
+  country      Country  @relation(fields: [country_code], references: [code])
+  Magnet       Magnet[]
+  travels      Travel[]
+
+  @@map("city")
+}
+
+model Magnet {
+  id           Int        @id @default(autoincrement())
+  url          String     @unique
+  name         String
+  type         MagnetType
+  created_at   DateTime   @default(now())
+  updated_at   DateTime   @updatedAt
+  country_code String?    @db.VarChar(2)
+  city_id      Int?
+  city         City?      @relation(fields: [city_id], references: [id], onDelete: Cascade)
+  country      Country?   @relation(fields: [country_code], references: [code], onDelete: Cascade)
+  travels      Travel[]
+
+  @@map("magnet")
+}
+
+enum Role {
+  USER
+  ADMIN
+
+  @@map("user_role")
+}
+
+enum MagnetType {
+  SPECIAL_CITY
+  COUNTRY
+  LOGO
+
+  @@map("magnet_type")
 }

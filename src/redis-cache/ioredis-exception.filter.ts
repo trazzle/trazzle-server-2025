@@ -11,7 +11,7 @@ export class IORedisExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Interner Server Error';
+    let message = 'Internal Server Error';
     let error = 'Internal Server Error';
 
     // Redis 연결 에러
