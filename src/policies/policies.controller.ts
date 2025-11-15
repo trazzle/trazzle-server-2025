@@ -26,9 +26,10 @@ export class PoliciesController {
       return res
         .status(HttpStatus.NOT_MODIFIED)
         .setHeader('ETag', etag)
-        .setHeader('Cache-Control', 'public, max-age=604800');
+        .setHeader('Cache-Control', 'public, max-age=604800')
+        .end();
     }
-    
+
     // 최초요청이거나 eTag가 다르면 -> 200 OK와 파일전송 (캐싱 유효시간 7일)
     return res
       .status(HttpStatus.OK)
@@ -58,7 +59,8 @@ export class PoliciesController {
       return res
         .status(HttpStatus.NOT_MODIFIED)
         .setHeader('ETag', etag)
-        .setHeader('Cache-Control', 'public, max-age=604800'); // 캐싱 유효시간: 일주일
+        .setHeader('Cache-Control', 'public, max-age=604800')
+        .end();
     }
     // 최초요청이거나 eTag가 다르면 -> 200 OK와 파일전송
     return res
