@@ -26,7 +26,7 @@ export class RedisCacheService implements IRedisCache {
    *
    * @param key - 키값 (고유값)
    * @param value - 저장값
-   * @param ttl - 유효시간
+   * @param ttl - 유효시간(초)
    */
   async set<T>(key: string, value: T, ttl?: number): Promise<void> {
     const serialized = typeof value === 'string' ? value : JSON.stringify(value);

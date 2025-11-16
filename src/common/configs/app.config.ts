@@ -18,6 +18,14 @@ const appConfig = registerAs('app', () => ({
   // discord webhook url
   discordWebhook: process.env.DISCORD_WEBHOOK_URL!,
   // 토큰 (jwt)
+  jwtSecret: process.env.JWT_SECRET!,
+  jwtExpiration: process.env.JWT_EXPIRATION!,
+  jwtRefreshSecret: process.env.JWT_REFRESH_SECRET!,
+  jwtRefreshExpiration: process.env.JWT_REFRESH_EXPIRATION!,
+  // KAKAO
+  kakaoRedirectUri: process.env.KAKAO_REDIRECT_URI!,
+  kakaoRestApiKey: process.env.KAKAO_REST_API_KEY!,
+  kakaoClientSecretKey: process.env.KAKAO_CLIENT_SECRET_KEY!,
 }));
 export type AppConfig = ConfigType<typeof appConfig>;
 
@@ -41,6 +49,14 @@ export const configModuleOptions = {
     AWS_REGION: z.string().min(1),
     AWS_S3_BUCKET_NAME: z.string().min(1),
     // 토큰 (jwt)
+    JWT_SECRET: z.string().min(1),
+    JWT_EXPIRATION: z.string().min(1),
+    JWT_REFRESH_SECRET: z.string().min(1),
+    JWT_REFRESH_EXPIRATION: z.string().min(1),
+    // KAKAO
+    KAKAO_REDIRECT_URI: z.string().min(1),
+    KAKAO_REST_API_KEY: z.string().min(1),
+    KAKAO_CLIENT_SECRET_KEY: z.string().min(1),
   }).parse,
   load: [appConfig],
 } satisfies ConfigModuleOptions;
