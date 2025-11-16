@@ -5,21 +5,21 @@ CREATE TYPE "user_role" AS ENUM ('USER', 'ADMIN');
 CREATE TYPE "magnet_type" AS ENUM ('SPECIAL_CITY', 'COUNTRY', 'LOGO');
 
 -- CreateTable
-CREATE TABLE "user" (
+CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
-    "account" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "intro" TEXT,
     "profile_image_url" TEXT,
     "role" "user_role" NOT NULL DEFAULT 'USER',
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3),
+    "email" TEXT NOT NULL,
 
-    CONSTRAINT "user_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "travel" (
+CREATE TABLE "travels" (
     "id" SERIAL NOT NULL,
     "start_date" TIMESTAMP(3) NOT NULL,
     "end_date" TIMESTAMP(3) NOT NULL,
@@ -33,34 +33,35 @@ CREATE TABLE "travel" (
     "etc_city_name" TEXT,
     "magnet_id" INTEGER NOT NULL,
 
-    CONSTRAINT "travel_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "travels_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "travel_image" (
+CREATE TABLE "travel_images" (
     "id" SERIAL NOT NULL,
     "sequence" INTEGER NOT NULL,
     "url" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "travel_id" INTEGER NOT NULL,
 
-    CONSTRAINT "travel_image_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "travel_images_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "country" (
+CREATE TABLE "countries" (
     "id" SERIAL NOT NULL,
     "code" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "continent" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
+    "name_kr" TEXT NOT NULL,
 
-    CONSTRAINT "country_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "countries_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "city" (
+CREATE TABLE "cities" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "name_kr" TEXT,
@@ -70,11 +71,11 @@ CREATE TABLE "city" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "country_code" TEXT NOT NULL,
 
-    CONSTRAINT "city_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "cities_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "magnet" (
+CREATE TABLE "magnets" (
     "id" SERIAL NOT NULL,
     "url" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -84,41 +85,41 @@ CREATE TABLE "magnet" (
     "country_code" VARCHAR(2),
     "city_id" INTEGER,
 
-    CONSTRAINT "magnet_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "magnets_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_account_key" ON "user"("account");
+CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "country_code_key" ON "country"("code");
+CREATE UNIQUE INDEX "countries_code_key" ON "countries"("code");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "country_name_key" ON "country"("name");
+CREATE UNIQUE INDEX "countries_name_key" ON "countries"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "magnet_url_key" ON "magnet"("url");
+CREATE UNIQUE INDEX "magnets_url_key" ON "magnets"("url");
 
 -- AddForeignKey
-ALTER TABLE "travel" ADD CONSTRAINT "travel_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "city"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "travels" ADD CONSTRAINT "travels_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "cities"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "travel" ADD CONSTRAINT "travel_country_code_fkey" FOREIGN KEY ("country_code") REFERENCES "country"("code") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "travels" ADD CONSTRAINT "travels_country_code_fkey" FOREIGN KEY ("country_code") REFERENCES "countries"("code") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "travel" ADD CONSTRAINT "travel_magnet_id_fkey" FOREIGN KEY ("magnet_id") REFERENCES "magnet"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "travels" ADD CONSTRAINT "travels_magnet_id_fkey" FOREIGN KEY ("magnet_id") REFERENCES "magnets"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "travel" ADD CONSTRAINT "travel_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "user"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "travels" ADD CONSTRAINT "travels_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "travel_image" ADD CONSTRAINT "travel_image_travel_id_fkey" FOREIGN KEY ("travel_id") REFERENCES "travel"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "travel_images" ADD CONSTRAINT "travel_images_travel_id_fkey" FOREIGN KEY ("travel_id") REFERENCES "travels"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "city" ADD CONSTRAINT "city_country_code_fkey" FOREIGN KEY ("country_code") REFERENCES "country"("code") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "cities" ADD CONSTRAINT "cities_country_code_fkey" FOREIGN KEY ("country_code") REFERENCES "countries"("code") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "magnet" ADD CONSTRAINT "magnet_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "city"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "magnets" ADD CONSTRAINT "magnets_city_id_fkey" FOREIGN KEY ("city_id") REFERENCES "cities"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "magnet" ADD CONSTRAINT "magnet_country_code_fkey" FOREIGN KEY ("country_code") REFERENCES "country"("code") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "magnets" ADD CONSTRAINT "magnets_country_code_fkey" FOREIGN KEY ("country_code") REFERENCES "countries"("code") ON DELETE CASCADE ON UPDATE CASCADE;
