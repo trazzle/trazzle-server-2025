@@ -13,7 +13,7 @@ export class AuthController {
     private readonly config: ConfigService,
   ) {}
 
-  @Get('kakao')
+  @Get('sign-in/kakao')
   requestKakao(@Req() req: Request, @Res() res: Response) {
     const redirect_uri = this.config.get<string>('app.kakaoRedirectUri')!;
     const client_id = this.config.get<string>('app.kakaoRestApiKey')!;
@@ -22,7 +22,7 @@ export class AuthController {
     return res.redirect(url);
   }
 
-  @Get('sign-in/kakao')
+  @Get('kakao/callback')
   @ApiOperation({ summary: '카카오 연동 로그인 인가코드 요청 Redirect URI' })
   async signInWithKakao(@Query('code') code: string, @Req() req: Request, @Res() res: Response) {
     const kakaoAccessToken = await this.authService.requestKakaoAccessToken(code);
