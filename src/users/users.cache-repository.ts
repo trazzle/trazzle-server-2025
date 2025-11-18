@@ -26,4 +26,12 @@ export class UserCacheRepositoryImpl implements IUsersCacheRepository {
     const key = USER_REFRESH_TOKEN_KEY(id);
     await this.redis.set(key, value, 3600 * 24 * 7); // TTL: 7Days
   }
+  async delUserAccessToken(id: number): Promise<void> {
+    const key = USER_ACCESS_TOKEN_KEY(id);
+    await this.redis.del(key);
+  }
+  async delUserRefreshToken(id: number): Promise<void> {
+    const key = USER_REFRESH_TOKEN_KEY(id);
+    await this.redis.del(key);
+  }
 }

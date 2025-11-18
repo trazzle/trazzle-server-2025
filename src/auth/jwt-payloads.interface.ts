@@ -1,4 +1,4 @@
 export interface IJwtPayloads {
-  userId: number;
+  sub: number;
   email: string;
 }

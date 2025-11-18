@@ -1,10 +1,12 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
-import { AuthService } from './auth.service';
-import { IJwtPayloads } from './jwt-payloads.interface';
-import { IJwtUser } from './jwt-user.interface';
+import { AuthService } from '../auth.service';
+import { IJwtPayloads } from '../jwt-payloads.interface';
+import { TrazzleUser } from '../trazzle-user.interface';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
     configService: ConfigService,
@@ -22,13 +24,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
    *
    * @param payloads
    */
-  async validate(payload: IJwtPayloads): Promise<IJwtUser> {
-    const { userId } = payload;
-    const user = await this.authService.validateUser(userId);
+  async validate(payload: IJwtPayloads): Promise<TrazzleUser> {
+    const { email, sub } = payload;
+    const user = await this.authService.validateUser({ id: sub, email: email });
     return {
       id: user.id,
       name: user.name,
       email: user.email,
-    } as IJwtUser;
+    } as TrazzleUser;
   }
 }

@@ -12,6 +12,11 @@ import { JwtModule } from '@nestjs/jwt';
 import { StringValue } from 'ms';
 import { USERS_CACHE } from '../users/users.cache-repository.interface';
 import { UserCacheRepositoryImpl } from '../users/users.cache-repository';
+import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './guards/jwt.strategy';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { GOOGLE_OAUTH_CLIENT_TOKEN } from './google-oauth-token.constant';
+import { OAuth2Client } from 'google-auth-library';
 
 @Module({
   imports: [
@@ -20,6 +25,7 @@ import { UserCacheRepositoryImpl } from '../users/users.cache-repository';
     RedisCacheModule,
     HttpModule,
     UsersModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
@@ -42,8 +48,10 @@ import { UserCacheRepositoryImpl } from '../users/users.cache-repository';
       provide: USERS_CACHE,
       useClass: UserCacheRepositoryImpl,
     },
+    JwtStrategy,
+    JwtAuthGuard,
   ],
   controllers: [AuthController],
-  exports: [AuthService],
+  exports: [AuthService, JwtAuthGuard],
 })
 export class AuthModule {}
