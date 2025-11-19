@@ -15,9 +15,14 @@ import { JwtService } from '@nestjs/jwt';
 import { IJwtPayloads } from './jwt-payloads.interface';
 import { IUsersCacheRepository, USERS_CACHE } from '../users/users.cache-repository.interface';
 import { URLSearchParams } from 'url';
+import { OAuth2Client } from 'google-auth-library';
+import * as crypto from 'crypto';
+import { TrazzleUser } from './trazzle-user.interface';
 
 @Injectable()
 export class AuthService {
+  private googleOAuthClient: OAuth2Client;
+
   constructor(
     private readonly http: HttpService,
     private readonly config: ConfigService,
@@ -26,7 +31,13 @@ export class AuthService {
     private readonly userRepository: IUsersRepository,
     @Inject(USERS_CACHE)
     private readonly usersCacheRepository: IUsersCacheRepository,
-  ) {}
+  ) {
+    this.googleOAuthClient = new OAuth2Client({
+      clientId: this.config.get<string>('app.googleClientId')!,
+      clientSecret: this.config.get<string>('app.googleClientSecretPassword')!,
+      redirectUri: this.config.get<string>('app.googleRedirectUri')!,
+    });
+  }
 
   /**
    * 로그인 유저 확인
@@ -34,14 +45,20 @@ export class AuthService {
    * @param id - 유저 고유 ID
    * @returns 유저정보
    */
-  async validateUser(dto: { id: number; email: string }) {
+  async validateUser(dto: { id: number; email: string }): Promise<TrazzleUser> {
     // tbd: 캐시히트일경우
+
     // 캐시미스일경우
     const user = await this.userRepository.findOneById(dto.id);
     if (!user || user.email !== dto.email) {
       throw new UnAuthenticatedUserException();
     }
-    return user;
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    } as TrazzleUser;
   }
 
   /**
@@ -61,7 +78,7 @@ export class AuthService {
    * @returns 카카오 토큰정보
    */
   async requestKakaoAccessToken(code: string): Promise<string> {
-    // if (!code) throw new BadRequestException('소셜연동로그인 인가코드를 얻는데 실패하였습니다.');
+    if (!code) throw new BadRequestException('소셜연동로그인 인가코드를 얻는데 실패하였습니다.');
 
     const clientId = this.config.get<string>('app.kakaoRestApiKey')!;
     const redirectUri = this.config.get<string>('app.kakaoRedirectUri')!;
@@ -134,7 +151,7 @@ export class AuthService {
 
     if (!user) {
       user = await this.generateNewUser(dto);
-      // tbd: 회원가입이 완료되면 해당계정으로 메일을 전송한다.
+      // // tbd: 회원가입이 완료되면 해당계정으로 메일을 전송한다.
       // return {
       //   accessToken: null,
       //   refreshToken: null,
@@ -154,6 +171,27 @@ export class AuthService {
       accessToken,
       refreshToken,
     };
+  }
+
+  getAuthenticateUri() {
+    const scopes = [
+      'https://www.googleapis.com/auth/userinfo.email', // 기본 google 계정 이메일주소 조회
+      'https://www.googleapis.com/auth/userinfo.profile', // 공개로 설정한 개인정보 전부 조회
+    ];
+
+    const state = crypto.randomBytes(32).toString('hex');
+    const authorizeUrl = this.googleOAuthClient.generateAuthUrl({
+      access_type: 'offline', // 브라우저 없을때 애플리케이션이 액세스토큰을 새로고침할 수 있는 여부
+      response_type: 'code',
+      scope: scopes,
+      state: state, // redirect_uri cross-site 요청위조 공격을 막기위해서
+    });
+    return authorizeUrl;
+  }
+
+  async requestGoogleAccessToken(dto: { code: string; state: string }) {
+    const { tokens } = await this.googleOAuthClient.getToken(dto.code);
+    return tokens;
   }
 
   /**
@@ -194,6 +232,13 @@ export class AuthService {
    */
   private async deleteAccessToken(id: number) {
     await this.usersCacheRepository.delUserAccessToken(id);
+  }
+
+  /**
+   * 로그인 유저 정보
+   */
+  private async generateSignInUserCache(accessToken: string, value: TrazzleUser) {
+    await this.usersCacheRepository.setSignInUserInfo(accessToken, value);
   }
 
   /**

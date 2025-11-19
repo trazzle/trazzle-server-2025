@@ -1,9 +1,23 @@
-import { Controller, Get, Post, Query, Req, Res } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  HttpStatus,
+  Inject,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
-import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { CurrentUser } from './decorators/current-user.decorator';
+import { TrazzleUser } from './trazzle-user.interface';
+import * as url from 'url';
 
 @ApiTags('인증')
 @Controller('auth')
@@ -14,6 +28,7 @@ export class AuthController {
   ) {}
 
   @Get('sign-in/kakao')
+  @ApiOperation({ summary: '카카오 로그인 요청 (추후 클라이언트를 안드로이드로 변경예정)' })
   requestKakao(@Req() req: Request, @Res() res: Response) {
     const redirect_uri = this.config.get<string>('app.kakaoRedirectUri')!;
     const client_id = this.config.get<string>('app.kakaoRestApiKey')!;
@@ -32,24 +47,42 @@ export class AuthController {
       name: kakaoUserInfo.name,
     });
 
-    // if (!accessToken || !refreshToken) {
-    //   // 회원가입상태라면 클라이언트 로그인화면 URI로 리다이렉트
-    //   // return res.redirect();
-    // }
-
-    return res.json({
+    return res.status(HttpStatus.OK).json({
       access_token: accessToken,
       refresh_token: refreshToken,
     });
   }
 
-  @Post('sign-in/google')
-  @ApiOperation({ summary: '구글 로그인 리다이렉트 URL' })
-  async signInWithGoogle() {}
+  @Get('sign-in/google')
+  @ApiOperation({ summary: '구글 로그인 요청 (추후 클라이언트를 안드로이드로 변경 예정)' })
+  requestGoogle(@Req() req: Request, @Res() res: Response) {
+    // 클라이언트에서 Google OAuth URL 요청
+    const url = this.authService.getAuthenticateUri();
+    return res.redirect(url);
+  }
+
+  @Get('google/callback')
+  @ApiOperation({ summary: '구글 로그인 리다이렉트 URI' })
+  async signInWithGoogle(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Req() req: Request,
+    @Res() res: Response,
+  ) {
+    const accessToken = await this.authService.requestGoogleAccessToken({
+      code: code,
+      state: state,
+    });
+  }
 
   @Post('sign-out')
   @ApiOperation({ summary: '로그아웃' })
-  async signOut() {}
+  @ApiOkResponse()
+  @UseGuards(JwtAuthGuard)
+  async signOut(@CurrentUser() user: TrazzleUser, @Res() res: Response) {
+    await this.authService.signOut(user.id);
+    return res.status(HttpStatus.OK).json({ message: '로그아웃 되었습니다.' });
+  }
 
   @Post('refresh')
   @ApiOperation({ summary: '액세스 토큰 리프래시' })

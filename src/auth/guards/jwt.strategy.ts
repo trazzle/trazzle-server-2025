@@ -26,11 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
    */
   async validate(payload: IJwtPayloads): Promise<TrazzleUser> {
     const { email, sub } = payload;
-    const user = await this.authService.validateUser({ id: sub, email: email });
-    return {
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    } as TrazzleUser;
+    const result = await this.authService.validateUser({ id: sub, email: email });
+    return result;
   }
 }

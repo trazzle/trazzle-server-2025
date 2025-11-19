@@ -26,6 +26,10 @@ const appConfig = registerAs('app', () => ({
   kakaoRedirectUri: process.env.KAKAO_REDIRECT_URI!,
   kakaoRestApiKey: process.env.KAKAO_REST_API_KEY!,
   kakaoClientSecretKey: process.env.KAKAO_CLIENT_SECRET_KEY!,
+  // GOOGLE
+  googleClientId: process.env.GOOGLE_CLIENT_ID!,
+  googleClientSecretPassword: process.env.GOOGLE_CLIENT_SECRET_PASSWORD!,
+  googleRedirectUri: process.env.GOOGLE_REDIRECT_URI!,
 }));
 export type AppConfig = ConfigType<typeof appConfig>;
 
@@ -57,6 +61,10 @@ export const configModuleOptions = {
     KAKAO_REDIRECT_URI: z.string().min(1),
     KAKAO_REST_API_KEY: z.string().min(1),
     KAKAO_CLIENT_SECRET_KEY: z.string().min(1),
+    // GOOGLE
+    GOOGLE_CLIENT_ID: z.string().min(1),
+    GOOGLE_CLIENT_SECRET_PASSWORD: z.string().min(1),
+    GOOGLE_REDIRECT_URI: z.string().min(1),
   }).parse,
   load: [appConfig],
 } satisfies ConfigModuleOptions;

@@ -42,6 +42,8 @@
     "axios": "^1.13.2",
     "class-transformer": "^0.5.1",
     "crypto": "^1.0.1",
+    "google-auth-library": "^10.5.0",
+    "googleapis": "^166.0.0",
     "ioredis": "^5.8.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
