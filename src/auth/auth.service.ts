@@ -173,6 +173,10 @@ export class AuthService {
     };
   }
 
+  /**
+   * 구글 로그인 URL 요청
+   * @returns
+   */
   getAuthenticateUri() {
     const scopes = [
       'https://www.googleapis.com/auth/userinfo.email', // 기본 google 계정 이메일주소 조회
@@ -189,9 +193,64 @@ export class AuthService {
     return authorizeUrl;
   }
 
+  /**
+   * 구글 OAuth인증 서버에게 토큰정보를 요청하여 액세스토큰을 얻는다.
+   * @param dto
+   * @returns
+   */
   async requestGoogleAccessToken(dto: { code: string; state: string }) {
-    const { tokens } = await this.googleOAuthClient.getToken(dto.code);
-    return tokens;
+    const { code } = dto;
+    if (!code) throw new BadRequestException('소셜연동로그인 인가코드를 얻는데 실패하였습니다.');
+
+    const { tokens } = await this.googleOAuthClient.getToken(code);
+    if (!tokens || !tokens.access_token) {
+      throw new InvalidTokenException('구글 계정 액세스토큰을 얻는데 실패하였습니다.');
+    }
+
+    const { access_token } = tokens;
+    this.googleOAuthClient.setCredentials(tokens);
+
+    return access_token;
+  }
+
+  /**
+   * 구글 액세스토큰을 활용하여 구글 로그인된 유저의 정보를 얻는다.
+   * @param googleAccessToken
+   * @returns
+   */
+  async requestGoogleUserInfo(googleAccessToken: string) {
+    const { data } = await firstValueFrom(
+      this.http.get('https://www.googleapis.com/oauth2/v2/userinfo', {
+        headers: {
+          Authorization: `Bearer ${googleAccessToken}`,
+        },
+      }),
+    );
+
+    return {
+      email: data.email,
+      name: data.name,
+    };
+  }
+
+  async signedWithGoogle(dto: { email: string; name: string }) {
+    let user = await this.userRepository.findOneByEmail(dto.email);
+    if (!user) {
+      user = await this.generateNewUser(dto);
+    }
+    const accessToken = await this.generateAccessToken({
+      sub: user.id,
+      email: user.email,
+    });
+    const refreshToken = await this.generateRefreshToken({
+      sub: user.id,
+      email: user.email,
+    });
+
+    return {
+      accessToken,
+      refreshToken,
+    };
   }
 
   /**

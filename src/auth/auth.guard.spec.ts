@@ -1,4 +1,4 @@
-import { AuthGuard } from './jwt-auth.guard';
+import { AuthGuard } from './guards/jwt-auth.guard';
 
 describe('AuthGuard', () => {
   it('should be defined', () => {

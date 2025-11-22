@@ -15,8 +15,8 @@ import { UserCacheRepositoryImpl } from '../users/users.cache-repository';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './guards/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { GOOGLE_OAUTH_CLIENT_TOKEN } from './google-oauth-token.constant';
-import { OAuth2Client } from 'google-auth-library';
+import { KakaoService } from './domains/kakao.service';
+import { GoogleService } from './domains/google.service';
 
 @Module({
   imports: [
@@ -50,6 +50,8 @@ import { OAuth2Client } from 'google-auth-library';
     },
     JwtStrategy,
     JwtAuthGuard,
+    KakaoService,
+    GoogleService,
   ],
   controllers: [AuthController],
   exports: [AuthService, JwtAuthGuard],

@@ -3,7 +3,6 @@ import {
   Controller,
   Get,
   HttpStatus,
-  Inject,
   Post,
   Query,
   Req,
@@ -33,7 +32,7 @@ export class AuthController {
     const redirect_uri = this.config.get<string>('app.kakaoRedirectUri')!;
     const client_id = this.config.get<string>('app.kakaoRestApiKey')!;
 
-    const url = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=profile_nickname,account_email&prompt=none`;
+    const url = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${client_id}&redirect_uri=${redirect_uri}&scope=profile_nickname,account_email&prompt=select_account`;
     return res.redirect(url);
   }
 
@@ -69,10 +68,19 @@ export class AuthController {
     @Req() req: Request,
     @Res() res: Response,
   ) {
-    const accessToken = await this.authService.requestGoogleAccessToken({
+    const q = url.parse(req.url, true).query;
+    if (q.error) {
+      throw new BadRequestException(`Error: ${q.error}`);
+    }
+
+    const googleAccessToken = await this.authService.requestGoogleAccessToken({
       code: code,
       state: state,
     });
+
+    const { email, name } = await this.authService.requestGoogleUserInfo(googleAccessToken);
+    const { accessToken, refreshToken } = await this.authService.signedWithGoogle({ email, name });
+    return res.status(HttpStatus.OK).json({ access_token: accessToken, refreshToken });
   }
 
   @Post('sign-out')
