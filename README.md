@@ -31,6 +31,39 @@ $ docker-compose up -d
 yarn install
 ```
 
+<br>
+
+## 국가/도시 초기 데이터 seeding (개발서버만 해당)
+
+```bash
+yarn db:seed
+```
+
+<br>
+
+## 데이터베이스 마이그레이션 (개발서버만 해당)
+
+> (1) **스키마 변경사항 업데이트 및 마이그레이션**
+>
+> - prisma.schema에서 스키마 변경시, 마이그레이션파일 추가 및 디비 즉각 반영
+> - 개발서버: `NODE_ENV=development`
+
+```bash
+yarn db:migrate
+```
+
+> (2) **마이그레이션 반영**
+>
+> - 먼저, git에서 prisma.schema와 migration파일들을 pull을 받은뒤에 실행해주세요.
+> - 마이그레이션된 파일들을 연결된 디비에 반영
+> - 개발서버: `NODE_ENV=development`
+
+```bash
+yarn db:pull
+```
+
+<br>
+
 ## Compile and run the project
 
 ```bash
