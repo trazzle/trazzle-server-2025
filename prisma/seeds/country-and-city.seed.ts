@@ -30,7 +30,7 @@ export async function seedCountriesAndCities(prisma: PrismaClient) {
   for (const item of data) {
     try {
       // 1. Country 데이터 upsert 중복방지
-      const country = await prisma.country.upsert({
+      const country = await prisma.countries.upsert({
         where: { code: item.id },
         update: {
           code: item.id,
@@ -50,7 +50,7 @@ export async function seedCountriesAndCities(prisma: PrismaClient) {
       // 2. City 생성
       if (item.cities && Array.isArray(item.cities) && item.cities.length > 0) {
         for (const cityData of item.cities) {
-          const existingCity = await prisma.city.findFirst({
+          const existingCity = await prisma.cities.findFirst({
             where: {
               name: cityData.name,
               latitude: cityData.latitude,
@@ -59,7 +59,7 @@ export async function seedCountriesAndCities(prisma: PrismaClient) {
             },
           });
           if (!existingCity) {
-            await prisma.city.create({
+            await prisma.cities.create({
               data: {
                 name: cityData.name,
                 name_kr: cityData.name_kr ?? null,
