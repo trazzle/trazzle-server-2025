@@ -4,6 +4,8 @@ import { AwsS3Service } from '../aws/aws-s3.service';
 import { TERMS_OF_PERSONAL_INFO_KEY, TERMS_OF_SERVICE_KEY } from './policies.key';
 import * as crypto from 'crypto';
 import { ApiOkResponse, ApiNotModifiedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiGetTermsOfService } from './decorators/api-get-terms-of-service.decorator';
+import { ApiGetTermsOfPersonalInformation } from './decorators/api-get-terms-of-personal-information.decorator';
 
 @ApiTags('이용약관')
 @Controller('policies')
@@ -13,9 +15,7 @@ export class PoliciesController {
    * 서비스 이용약관 pdf 파일 조회 요청
    */
   @Get('terms-of-service')
-  @ApiOperation({ summary: '서비스 이용약관 pdf 파일 조회 API' })
-  @ApiOkResponse()
-  @ApiNotModifiedResponse()
+  @ApiGetTermsOfService()
   async getTermsOfService(@Req() req: Request, @Res() res: Response) {
     // S3에서 파일 조회 (성능최적화를 해야된다면 서비스단을 만들어서 redis 캐시까지 고려..)
     const file = await this.awsS3BucketService.getFile(TERMS_OF_SERVICE_KEY);
@@ -49,9 +49,7 @@ export class PoliciesController {
    * 개인정보 이용약관 pdf 파일 조회 요청
    */
   @Get('terms-of-personal-info')
-  @ApiOperation({ summary: '개인정보 이용약관 pdf 파일 조회 API' })
-  @ApiOkResponse()
-  @ApiNotModifiedResponse()
+  @ApiGetTermsOfPersonalInformation()
   async getTermsOfPersonalInformation(@Req() req: Request, @Res() res: Response) {
     // S3에서 파일 조회
     const file = await this.awsS3BucketService.getFile(TERMS_OF_PERSONAL_INFO_KEY);
