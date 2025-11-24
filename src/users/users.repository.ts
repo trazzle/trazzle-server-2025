@@ -33,17 +33,24 @@ export class UserRepositoryImpl implements IUsersRepository {
     });
   }
 
-  async update(id: number, name: string, intro: string): Promise<Users> {
+  async update(params: {
+    id: number;
+    name?: string;
+    intro?: string;
+    profileImageUrl?: string;
+  }): Promise<Users> {
     return await this.prisma.users.update({
       where: {
-        id: id,
+        id: params.id,
       },
       data: {
-        name: name,
-        intro: intro,
+        name: params.name,
+        intro: params.intro,
+        profile_image_url: params.profileImageUrl,
       },
     });
   }
+
   async delete(id: number): Promise<void> {
     await this.prisma.users.delete({
       where: {
