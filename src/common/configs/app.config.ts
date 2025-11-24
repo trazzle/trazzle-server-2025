@@ -37,6 +37,7 @@ export const configModuleOptions = {
   isGlobal: true,
   envFilePath: process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development',
   validate: z.object({
+    // 서버포트
     SERVER_PORT: z.coerce.number(),
     // 데이터베이스
     DATABASE_URL: z.string().min(1),

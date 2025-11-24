@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 import { AwsS3Service } from '../aws/aws-s3.service';
 import { TERMS_OF_PERSONAL_INFO_KEY, TERMS_OF_SERVICE_KEY } from './policies.key';
 import * as crypto from 'crypto';
-import { ApiOkResponse, ApiNotModifiedResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { ApiGetTermsOfService } from './decorators/api-get-terms-of-service.decorator';
 import { ApiGetTermsOfPersonalInformation } from './decorators/api-get-terms-of-personal-information.decorator';
 

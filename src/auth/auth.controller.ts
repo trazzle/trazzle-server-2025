@@ -9,7 +9,13 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
@@ -100,11 +106,11 @@ export class AuthController {
 
   @Post('sign-out')
   @ApiOperation({ summary: '로그아웃' })
-  @ApiOkResponse({ description: '성공 응답' })
+  @ApiNoContentResponse({ description: '성공 응답' })
   @UseGuards(JwtAuthGuard)
   async signOut(@CurrentUser() user: TrazzleUser, @Res() res: Response) {
     await this.authService.signOut(user.id);
-    return res.status(HttpStatus.OK).json({ message: '로그아웃 되었습니다.' });
+    return res.status(HttpStatus.NO_CONTENT).json();
   }
 
   @Post('refresh')
