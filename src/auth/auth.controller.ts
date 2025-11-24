@@ -9,7 +9,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
 import { ConfigService } from '@nestjs/config';
@@ -17,6 +17,8 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { TrazzleUser } from './trazzle-user.interface';
 import * as url from 'url';
+import { SignInWithKakaoResponseDto } from './dtos/sign-in-with-kakao.dto';
+import { SignInWithGoogleResponseDto } from './dtos/sign-in-with-google.dto';
 
 @ApiTags('인증')
 @Controller('auth')
@@ -38,6 +40,8 @@ export class AuthController {
 
   @Get('kakao/callback')
   @ApiOperation({ summary: '카카오 연동 로그인 인가코드 요청 Redirect URI' })
+  @ApiQuery({ name: 'code', description: '인가 코드' })
+  @ApiOkResponse({ description: '성공 응답', type: SignInWithKakaoResponseDto })
   async signInWithKakao(@Query('code') code: string, @Req() req: Request, @Res() res: Response) {
     const kakaoAccessToken = await this.authService.requestKakaoAccessToken(code);
     const kakaoUserInfo = await this.authService.requestKakaoUserInfo(kakaoAccessToken);
@@ -46,10 +50,12 @@ export class AuthController {
       name: kakaoUserInfo.name,
     });
 
-    return res.status(HttpStatus.OK).json({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
+    return res.status(HttpStatus.OK).json(
+      SignInWithKakaoResponseDto.of({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      }),
+    );
   }
 
   @Get('sign-in/google')
@@ -62,6 +68,9 @@ export class AuthController {
 
   @Get('google/callback')
   @ApiOperation({ summary: '구글 로그인 리다이렉트 URI' })
+  @ApiQuery({ name: 'code', description: '인가 코드' })
+  @ApiQuery({ name: 'state', description: '상태 코드' })
+  @ApiOkResponse({ description: '성공 응답', type: SignInWithGoogleResponseDto })
   async signInWithGoogle(
     @Query('code') code: string,
     @Query('state') state: string,
@@ -80,12 +89,18 @@ export class AuthController {
 
     const { email, name } = await this.authService.requestGoogleUserInfo(googleAccessToken);
     const { accessToken, refreshToken } = await this.authService.signedWithGoogle({ email, name });
-    return res.status(HttpStatus.OK).json({ access_token: accessToken, refreshToken });
+
+    return res.status(HttpStatus.OK).json(
+      SignInWithGoogleResponseDto.of({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      }),
+    );
   }
 
   @Post('sign-out')
   @ApiOperation({ summary: '로그아웃' })
-  @ApiOkResponse()
+  @ApiOkResponse({ description: '성공 응답' })
   @UseGuards(JwtAuthGuard)
   async signOut(@CurrentUser() user: TrazzleUser, @Res() res: Response) {
     await this.authService.signOut(user.id);
