@@ -64,8 +64,9 @@ export class AwsS3Service {
    * @param folder  - s3 버킷 내 객체 경로 (파일 제외)
    * @returns 업로드 파일 s3 url
    */
-  async uploadFile(file: Express.Multer.File, folder: string): Promise<string> {
+  async uploadFile(params: { file: Express.Multer.File; folder: string }): Promise<string> {
     // 파일 확장자 추출
+    const { file, folder } = params;
     const ext = this.getFileExtension(file);
     const key = `${folder}/${Date.now()}-${crypto.randomBytes(8).toString('hex')}${ext}`;
     const command = new PutObjectCommand({
@@ -90,8 +91,9 @@ export class AwsS3Service {
    * @param folder  - s3 버킷 내 객체 경로 (파일제외)
    * @returns 업로드 파일 s3 url 리스트
    */
-  async uploadFiles(files: Express.Multer.File[], folder: string): Promise<string[]> {
-    const uploadPromises = files.map((item) => this.uploadFile(item, folder));
+  async uploadFiles(params: { files: Express.Multer.File[]; folder: string }): Promise<string[]> {
+    const { files, folder } = params;
+    const uploadPromises = files.map((item) => this.uploadFile({ file: item, folder: folder }));
     const results = await Promise.all(uploadPromises);
     return results;
   }
