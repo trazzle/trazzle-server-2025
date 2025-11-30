@@ -17,6 +17,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import { IsPublic } from 'src/common/decorators/is-public.decorator';
 import * as url from 'url';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -33,6 +34,7 @@ export class AuthController {
   ) {}
 
   @Get('sign-in/kakao')
+  @IsPublic()
   @ApiOperation({ summary: '카카오 로그인 요청 (추후 클라이언트를 안드로이드로 변경예정)' })
   requestKakao(@Req() req: Request, @Res() res: Response) {
     const redirect_uri = this.config.get<string>('app.kakaoRedirectUri')!;
@@ -63,6 +65,7 @@ export class AuthController {
   }
 
   @Get('sign-in/google')
+  @IsPublic()
   @ApiOperation({ summary: '구글 로그인 요청 (추후 클라이언트를 안드로이드로 변경 예정)' })
   requestGoogle(@Req() req: Request, @Res() res: Response) {
     // 클라이언트에서 Google OAuth URL 요청
