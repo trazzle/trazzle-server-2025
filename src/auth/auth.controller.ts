@@ -7,8 +7,8 @@ import {
   Query,
   Req,
   Res,
-  UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   ApiNoContentResponse,
   ApiOkResponse,
@@ -16,15 +16,13 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
-import { ConfigService } from '@nestjs/config';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { CurrentUser } from './decorators/current-user.decorator';
-import { TrazzleUser } from './trazzle-user.interface';
 import * as url from 'url';
-import { SignInWithKakaoResponseDto } from './dtos/sign-in-with-kakao.dto';
+import { AuthService } from './auth.service';
+import { CurrentUser } from './decorators/current-user.decorator';
 import { SignInWithGoogleResponseDto } from './dtos/sign-in-with-google.dto';
+import { SignInWithKakaoResponseDto } from './dtos/sign-in-with-kakao.dto';
+import { TrazzleUser } from './trazzle-user.interface';
 
 @ApiTags('인증')
 @Controller('auth')
@@ -107,7 +105,6 @@ export class AuthController {
   @Post('sign-out')
   @ApiOperation({ summary: '로그아웃' })
   @ApiNoContentResponse({ description: '성공 응답' })
-  @UseGuards(JwtAuthGuard)
   async signOut(@CurrentUser() user: TrazzleUser, @Res() res: Response) {
     await this.authService.signOut(user.id);
     return res.status(HttpStatus.NO_CONTENT).json();

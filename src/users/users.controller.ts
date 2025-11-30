@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpStatus,
-  Patch,
-  Put,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Patch, Put, Req, Res } from '@nestjs/common';
 import {
   ApiBody,
   ApiNoContentResponse,
@@ -17,20 +6,18 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
-import { UsersService } from './users.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Request, Response } from 'express';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { TrazzleUser } from '../auth/trazzle-user.interface';
-import { Request, Response } from 'express';
-import { MyInfoResonseDto } from './dtos/my-info.dto';
-import { UserTravelStatisticsService } from './user-statistics.service';
-import { UpdateMyInfoRequestDto, UpdateMyInfoResponseDto } from './dtos/update-my-info.dto';
 import { SwaggerApiPropertiesDescription } from '../common/decorators/swagger-api-properties-description.decorator';
+import { MyInfoResonseDto } from './dtos/my-info.dto';
+import { UpdateMyInfoRequestDto, UpdateMyInfoResponseDto } from './dtos/update-my-info.dto';
 import { UpdateProfileRequestDto, UpdateProfileResponseDto } from './dtos/update-profile.dto';
+import { UserTravelStatisticsService } from './user-statistics.service';
+import { UsersService } from './users.service';
 
 @ApiTags('회원')
 @Controller('users')
-@UseGuards(JwtAuthGuard)
 export class UsersController {
   constructor(
     private readonly userService: UsersService,

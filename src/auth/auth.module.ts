@@ -1,22 +1,22 @@
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { StringValue } from 'ms';
+import { AccessTokenGuard } from 'src/auth/guards/jwt-auth.guard';
 import { PrismaModule } from '../prisma/prisma.module';
+import { RedisCacheModule } from '../redis-cache/redis-cache.module';
+import { UserCacheRepositoryImpl } from '../users/users.cache-repository';
+import { USERS_CACHE } from '../users/users.cache-repository.interface';
+import { UsersModule } from '../users/users.module';
 import { UserRepositoryImpl } from '../users/users.repository';
 import { USERS } from '../users/users.repository.interface';
-import { RedisCacheModule } from '../redis-cache/redis-cache.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UsersModule } from '../users/users.module';
-import { HttpModule } from '@nestjs/axios';
-import { JwtModule } from '@nestjs/jwt';
-import { StringValue } from 'ms';
-import { USERS_CACHE } from '../users/users.cache-repository.interface';
-import { UserCacheRepositoryImpl } from '../users/users.cache-repository';
-import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from './guards/jwt.strategy';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { KakaoService } from './domains/kakao.service';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 import { GoogleService } from './domains/google.service';
+import { KakaoService } from './domains/kakao.service';
+import { JwtStrategy } from './guards/jwt.strategy';
 
 @Module({
   imports: [
@@ -49,11 +49,11 @@ import { GoogleService } from './domains/google.service';
       useClass: UserCacheRepositoryImpl,
     },
     JwtStrategy,
-    JwtAuthGuard,
+    AccessTokenGuard,
     KakaoService,
     GoogleService,
   ],
   controllers: [AuthController],
-  exports: [AuthService, JwtAuthGuard],
+  exports: [AuthService, AccessTokenGuard],
 })
 export class AuthModule {}

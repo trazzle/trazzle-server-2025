@@ -1,18 +1,20 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { configModuleOptions } from './common/configs/app.config';
+import { APP_GUARD } from '@nestjs/core';
+import { AccessTokenGuard } from 'src/auth/guards/jwt-auth.guard';
 import { AppController } from './app.controller';
+import { AuthModule } from './auth/auth.module';
+import { AwsModule } from './aws/aws.module';
+import { CitiesModule } from './cities/cities.module';
+import { configModuleOptions } from './common/configs/app.config';
+import { CountriesModule } from './countries/countries.module';
+import { DiscordsModule } from './discords/discords.module';
+import { MagnetsModule } from './magnets/magnets.module';
+import { PoliciesModule } from './policies/policies.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RedisCacheModule } from './redis-cache/redis-cache.module';
-import { DiscordsModule } from './discords/discords.module';
-import { PoliciesModule } from './policies/policies.module';
-import { CountriesModule } from './countries/countries.module';
-import { CitiesModule } from './cities/cities.module';
-import { MagnetsModule } from './magnets/magnets.module';
 import { TravelsModule } from './travels/travels.module';
-import { AwsModule } from './aws/aws.module';
 import { UsersModule } from './users/users.module';
-import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -30,6 +32,11 @@ import { AuthModule } from './auth/auth.module';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AccessTokenGuard,
+    },
+  ],
 })
 export class AppModule {}
