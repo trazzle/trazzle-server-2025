@@ -4,7 +4,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { StringValue } from 'ms';
-import { AccessTokenGuard } from 'src/auth/guards/jwt-auth.guard';
+import { AccessTokenGuard } from 'src/auth/guards/access-token.guard';
 import { PrismaModule } from '../prisma/prisma.module';
 import { RedisCacheModule } from '../redis-cache/redis-cache.module';
 import { UserCacheRepositoryImpl } from '../users/users.cache-repository';

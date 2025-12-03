@@ -2,13 +2,14 @@ import { Controller, Get, HttpStatus, Req, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import * as crypto from 'crypto';
 import { Request, Response } from 'express';
-import { IsPublic } from 'src/common/decorators/is-public.decorator';
+import { PublicAPI } from 'src/common/decorators/public-api.decorator';
 import { AwsS3Service } from '../aws/aws-s3.service';
 import { ApiGetTermsOfPersonalInformation } from './decorators/api-get-terms-of-personal-information.decorator';
 import { ApiGetTermsOfService } from './decorators/api-get-terms-of-service.decorator';
 import { TERMS_OF_PERSONAL_INFO_KEY, TERMS_OF_SERVICE_KEY } from './policies.key';
 
 @ApiTags('이용약관')
+@PublicAPI()
 @Controller('policies')
 export class PoliciesController {
   constructor(private readonly awsS3BucketService: AwsS3Service) {}
@@ -16,7 +17,6 @@ export class PoliciesController {
    * 서비스 이용약관 pdf 파일 조회 요청
    */
   @Get('terms-of-service')
-  @IsPublic()
   @ApiGetTermsOfService()
   async getTermsOfService(@Req() req: Request, @Res() res: Response) {
     // S3에서 파일 조회 (성능최적화를 해야된다면 서비스단을 만들어서 redis 캐시까지 고려..)
@@ -51,7 +51,6 @@ export class PoliciesController {
    * 개인정보 이용약관 pdf 파일 조회 요청
    */
   @Get('terms-of-personal-info')
-  @IsPublic()
   @ApiGetTermsOfPersonalInformation()
   async getTermsOfPersonalInformation(@Req() req: Request, @Res() res: Response) {
     // S3에서 파일 조회
