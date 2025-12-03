@@ -7,8 +7,8 @@ import {
   Query,
   Req,
   Res,
-  UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   ApiNoContentResponse,
   ApiOkResponse,
@@ -16,15 +16,14 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthService } from './auth.service';
 import { Request, Response } from 'express';
-import { ConfigService } from '@nestjs/config';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { CurrentUser } from './decorators/current-user.decorator';
-import { TrazzleUser } from './trazzle-user.interface';
+import { PublicAPI } from 'src/common/decorators/public-api.decorator';
 import * as url from 'url';
-import { SignInWithKakaoResponseDto } from './dtos/sign-in-with-kakao.dto';
+import { AuthService } from './auth.service';
+import { CurrentUser } from './decorators/current-user.decorator';
 import { SignInWithGoogleResponseDto } from './dtos/sign-in-with-google.dto';
+import { SignInWithKakaoResponseDto } from './dtos/sign-in-with-kakao.dto';
+import { TrazzleUser } from './trazzle-user.interface';
 
 @ApiTags('인증')
 @Controller('auth')
@@ -35,6 +34,7 @@ export class AuthController {
   ) {}
 
   @Get('sign-in/kakao')
+  @PublicAPI()
   @ApiOperation({ summary: '카카오 로그인 요청 (추후 클라이언트를 안드로이드로 변경예정)' })
   requestKakao(@Req() req: Request, @Res() res: Response) {
     const redirect_uri = this.config.get<string>('app.kakaoRedirectUri')!;
@@ -65,6 +65,7 @@ export class AuthController {
   }
 
   @Get('sign-in/google')
+  @PublicAPI()
   @ApiOperation({ summary: '구글 로그인 요청 (추후 클라이언트를 안드로이드로 변경 예정)' })
   requestGoogle(@Req() req: Request, @Res() res: Response) {
     // 클라이언트에서 Google OAuth URL 요청
@@ -107,7 +108,6 @@ export class AuthController {
   @Post('sign-out')
   @ApiOperation({ summary: '로그아웃' })
   @ApiNoContentResponse({ description: '성공 응답' })
-  @UseGuards(JwtAuthGuard)
   async signOut(@CurrentUser() user: TrazzleUser, @Res() res: Response) {
     await this.authService.signOut(user.id);
     return res.status(HttpStatus.NO_CONTENT).json();

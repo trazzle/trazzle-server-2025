@@ -1,13 +1,15 @@
 import { Controller, Get, HttpStatus, Req, Res } from '@nestjs/common';
-import { Request, Response } from 'express';
-import { AwsS3Service } from '../aws/aws-s3.service';
-import { TERMS_OF_PERSONAL_INFO_KEY, TERMS_OF_SERVICE_KEY } from './policies.key';
-import * as crypto from 'crypto';
 import { ApiTags } from '@nestjs/swagger';
-import { ApiGetTermsOfService } from './decorators/api-get-terms-of-service.decorator';
+import * as crypto from 'crypto';
+import { Request, Response } from 'express';
+import { PublicAPI } from 'src/common/decorators/public-api.decorator';
+import { AwsS3Service } from '../aws/aws-s3.service';
 import { ApiGetTermsOfPersonalInformation } from './decorators/api-get-terms-of-personal-information.decorator';
+import { ApiGetTermsOfService } from './decorators/api-get-terms-of-service.decorator';
+import { TERMS_OF_PERSONAL_INFO_KEY, TERMS_OF_SERVICE_KEY } from './policies.key';
 
 @ApiTags('이용약관')
+@PublicAPI()
 @Controller('policies')
 export class PoliciesController {
   constructor(private readonly awsS3BucketService: AwsS3Service) {}
