@@ -45,6 +45,7 @@ export class AuthController {
   }
 
   @Get('kakao/callback')
+  @PublicAPI()
   @ApiOperation({ summary: '카카오 연동 로그인 인가코드 요청 Redirect URI' })
   @ApiQuery({ name: 'code', description: '인가 코드' })
   @ApiOkResponse({ description: '성공 응답', type: SignInWithKakaoResponseDto })
@@ -74,6 +75,7 @@ export class AuthController {
   }
 
   @Get('google/callback')
+  @PublicAPI()
   @ApiOperation({ summary: '구글 로그인 리다이렉트 URI' })
   @ApiQuery({ name: 'code', description: '인가 코드' })
   @ApiQuery({ name: 'state', description: '상태 코드' })
